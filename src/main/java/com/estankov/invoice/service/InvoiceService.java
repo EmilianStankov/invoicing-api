@@ -14,7 +14,7 @@ import java.util.List;
 public class InvoiceService {
 
     public CalculateResponse suminvoices(CalculateRequest calculateRequest) {
-        List<CSVRecord> csvRecords = CsvParser.parseCsv(calculateRequest.getFile());
+        List<CSVRecord> csvRecords = InvoiceCsvParser.parseCsv(calculateRequest.getFile());
 
         List<Customer> customers = csvRecords.stream()
                 .map(record -> Customer.builder()

@@ -12,10 +12,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
-public class CsvParser {
+public class InvoiceCsvParser {
 
     public static List<CSVRecord> parseCsv(MultipartFile file) {
         CSVParser csvParser;
@@ -30,14 +31,32 @@ public class CsvParser {
                         InvoiceHeader.CURRENCY.getName(),
                         InvoiceHeader.TOTAL.getName())
                 .setIgnoreHeaderCase(true)
-                .setSkipHeaderRecord(true)
+                .setSkipHeaderRecord(false)
+                .setAllowMissingColumnNames(false)
                 .setAllowDuplicateHeaderNames(false)
                 .build();
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             csvParser = new CSVParser(fileReader, csvFormat);
-            return csvParser.getRecords();
+            List<CSVRecord> records = csvParser.getRecords();
+            validateRecords(csvFormat, records);
+            return records.subList(1, records.size());
         } catch (IOException ex) {
             throw new CsvParseException("Failed to parse uploaded csv file!", ex);
         }
+    }
+
+    private static void validateRecords(CSVFormat csvFormat, List<CSVRecord> records) {
+        if (records.size() < 2) {
+            throw new CsvParseException("Csv file does not contain invoice data");
+        }
+        CSVRecord headerRecord = records.get(0);
+        if (!headerRecord.isConsistent()) {
+            throw new CsvParseException("Csv does not contain data in the correct format");
+        }
+        Arrays.stream(csvFormat.getHeader()).forEach(header -> {
+            if (!headerRecord.isMapped(header)) {
+                throw new CsvParseException("Csv does not contain data in the correct format");
+            }
+        });
     }
 }
