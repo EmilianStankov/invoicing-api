@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 @Builder
 public class CalculateResponse {
+
     private String currency;
     private List<Customer> customers;
 }
