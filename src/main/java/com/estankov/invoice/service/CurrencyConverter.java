@@ -41,6 +41,11 @@ public class CurrencyConverter {
 
     private void validateExchangeRates(List<ExchangeRate> exchangeRates, String outputCurrency) {
         exchangeRates.stream()
+                .filter(rate -> rate.getRate().equals(BigDecimal.ONE))
+                .findAny()
+                .orElseThrow(() -> new InconsistentDataException(
+                        "Base currency not provided in the supplied list of exchange rates"));
+        exchangeRates.stream()
                 .filter(rate -> rate.getCurrency().equals(outputCurrency))
                 .findAny()
                 .orElseThrow(() -> new InconsistentDataException(
