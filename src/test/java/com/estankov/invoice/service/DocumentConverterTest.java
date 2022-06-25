@@ -33,12 +33,7 @@ class DocumentConverterTest {
         final MockMultipartFile file = new MockMultipartFile("data.csv", fileContent.getBytes(StandardCharsets.UTF_8));
 
         final List<InvoiceDocument> documents = objectUnderTest.convertToDocuments(
-                new CalculateRequest(
-                        file,
-                        List.of("EUR:1", "BGN:1.95", "USD:0.987"),
-                        "EUR",
-                        null
-                )
+                buildCalculateRequest(file)
         );
 
         assertEquals(3, documents.size());
@@ -78,14 +73,17 @@ class DocumentConverterTest {
                 """;
         final MockMultipartFile file = new MockMultipartFile("data.csv", fileContent.getBytes(StandardCharsets.UTF_8));
 
-        assertThrows(DataFormatException.class, () -> objectUnderTest.convertToDocuments(
-                new CalculateRequest(
-                        file,
-                        List.of("EUR:1", "BGN:1.95", "USD:0.987"),
-                        "EUR",
-                        null
-                )
-        ));
+        CalculateRequest request = buildCalculateRequest(file);
+        assertThrows(DataFormatException.class, () -> objectUnderTest.convertToDocuments(request));
+    }
+
+    private CalculateRequest buildCalculateRequest(MockMultipartFile file) {
+        return new CalculateRequest(
+                file,
+                List.of("EUR:1", "BGN:1.95", "USD:0.987"),
+                "EUR",
+                null
+        );
     }
 
     @Test
@@ -98,14 +96,8 @@ class DocumentConverterTest {
                 """;
         final MockMultipartFile file = new MockMultipartFile("data.csv", fileContent.getBytes(StandardCharsets.UTF_8));
 
-        assertThrows(InconsistentDataException.class, () -> objectUnderTest.convertToDocuments(
-                new CalculateRequest(
-                        file,
-                        List.of("EUR:1", "BGN:1.95", "USD:0.987"),
-                        "EUR",
-                        null
-                )
-        ));
+        CalculateRequest request = buildCalculateRequest(file);
+        assertThrows(InconsistentDataException.class, () -> objectUnderTest.convertToDocuments(request));
     }
 
     @Test
@@ -118,13 +110,7 @@ class DocumentConverterTest {
                 """;
         final MockMultipartFile file = new MockMultipartFile("data.csv", fileContent.getBytes(StandardCharsets.UTF_8));
 
-        assertThrows(InconsistentDataException.class, () -> objectUnderTest.convertToDocuments(
-                new CalculateRequest(
-                        file,
-                        List.of("EUR:1", "BGN:1.95", "USD:0.987"),
-                        "EUR",
-                        null
-                )
-        ));
+        CalculateRequest request = buildCalculateRequest(file);
+        assertThrows(InconsistentDataException.class, () -> objectUnderTest.convertToDocuments(request));
     }
 }

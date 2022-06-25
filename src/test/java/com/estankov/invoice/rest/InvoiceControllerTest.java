@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class InvoiceControllerTest {
+class InvoiceControllerTest {
 
     public static final String VALID_FILE_CONTENT =
             """

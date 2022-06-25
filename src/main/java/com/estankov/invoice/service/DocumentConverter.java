@@ -28,15 +28,15 @@ public class DocumentConverter {
 
         try {
             documents = csvRecords.stream()
-                    .map(record -> InvoiceDocument.builder()
-                            .customer(record.get(InvoiceHeader.CUSTOMER.getName()))
-                            .vatNumber(Integer.parseInt(record.get(InvoiceHeader.VAT_NUMBER.getName())))
-                            .documentNumber(Integer.parseInt(record.get(InvoiceHeader.DOCUMENT_NUMBER.getName())))
-                            .type(InvoiceDocument.Type.getType(record.get(InvoiceHeader.TYPE.getName())))
-                            .parentDocument(optionalOfInteger(record.get(InvoiceHeader.PARENT_DOCUMENT.getName()))
+                    .map(csvRecord -> InvoiceDocument.builder()
+                            .customer(csvRecord.get(InvoiceHeader.CUSTOMER.getName()))
+                            .vatNumber(Integer.parseInt(csvRecord.get(InvoiceHeader.VAT_NUMBER.getName())))
+                            .documentNumber(Integer.parseInt(csvRecord.get(InvoiceHeader.DOCUMENT_NUMBER.getName())))
+                            .type(InvoiceDocument.Type.getType(csvRecord.get(InvoiceHeader.TYPE.getName())))
+                            .parentDocument(optionalOfInteger(csvRecord.get(InvoiceHeader.PARENT_DOCUMENT.getName()))
                                     .orElse(null))
-                            .currency(record.get(InvoiceHeader.CURRENCY.getName()))
-                            .total(new BigDecimal(record.get(InvoiceHeader.TOTAL.getName())))
+                            .currency(csvRecord.get(InvoiceHeader.CURRENCY.getName()))
+                            .total(new BigDecimal(csvRecord.get(InvoiceHeader.TOTAL.getName())))
                             .build())
                     .toList();
         } catch (NumberFormatException e) {

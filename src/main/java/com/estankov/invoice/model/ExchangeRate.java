@@ -9,6 +9,6 @@ import java.math.BigDecimal;
 @Builder
 public class ExchangeRate {
 
-    public String currency;
-    public BigDecimal rate;
+    private String currency;
+    private BigDecimal rate;
 }

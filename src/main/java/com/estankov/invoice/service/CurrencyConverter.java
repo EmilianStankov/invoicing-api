@@ -40,15 +40,27 @@ public class CurrencyConverter {
     }
 
     private void validateExchangeRates(List<ExchangeRate> exchangeRates, String outputCurrency) {
-        exchangeRates.stream()
+        validateBaseCurrency(exchangeRates);
+        validateOutputCurrency(exchangeRates, outputCurrency);
+    }
+
+    private void validateBaseCurrency(List<ExchangeRate> exchangeRates) {
+        List<ExchangeRate> baseExchangeRate = exchangeRates.stream()
                 .filter(rate -> rate.getRate().equals(BigDecimal.ONE))
-                .findAny()
-                .orElseThrow(() -> new InconsistentDataException(
-                        "Base currency not provided in the supplied list of exchange rates"));
-        exchangeRates.stream()
+                .toList();
+        if (baseExchangeRate.isEmpty()) {
+            throw new InconsistentDataException(
+                    "Base currency not provided in the supplied list of exchange rates");
+        }
+    }
+
+    private void validateOutputCurrency(List<ExchangeRate> exchangeRates, String outputCurrency) {
+        List<ExchangeRate> outputExchangeRate = exchangeRates.stream()
                 .filter(rate -> rate.getCurrency().equalsIgnoreCase(outputCurrency))
-                .findAny()
-                .orElseThrow(() -> new InconsistentDataException(
-                        "Currency: " + outputCurrency + " not found in the supplied list of exchange rates"));
+                .toList();
+        if (outputExchangeRate.isEmpty()) {
+            throw new InconsistentDataException(
+                    "Currency: " + outputCurrency + " not found in the supplied list of exchange rates");
+        }
     }
 }
