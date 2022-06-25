@@ -1,31 +1,39 @@
 package com.estankov.invoice.service;
 
-import com.estankov.invoice.exception.DataFormatException;
-import com.estankov.invoice.exception.InconsistentDataException;
 import com.estankov.invoice.model.*;
-import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class InvoiceService {
 
-    private final InvoiceCsvParser csvParser;
+    private final DocumentConverter documentConverter;
+    private final CurrencyConverter currencyConverter;
 
-    public InvoiceService(InvoiceCsvParser csvParser) {
-        this.csvParser = csvParser;
+    public InvoiceService(DocumentConverter documentConverter, CurrencyConverter currencyConverter) {
+        this.documentConverter = documentConverter;
+        this.currencyConverter = currencyConverter;
     }
 
     public CalculateResponse sumInvoices(CalculateRequest calculateRequest) {
-        List<InvoiceDocument> invoiceDocuments = convertToDocuments(calculateRequest);
+        List<InvoiceDocument> invoiceDocuments = documentConverter.convertToDocuments(calculateRequest);
+        List<ExchangeRate> exchangeRates = currencyConverter.getExchangeRates(calculateRequest.getExchangeRates(),
+                calculateRequest.getOutputCurrency());
 
-        List<Customer> customers = invoiceDocuments.stream()
-                .map(document -> Customer.builder()
-                        .name(document.getCustomer())
-                        .balance(document.getTotal())
+        Map<Integer, List<InvoiceDocument>> documents = invoiceDocuments.stream()
+                .map(document -> calculateBalance(document, exchangeRates))
+                .collect(Collectors.groupingBy(InvoiceDocument::getVatNumber));
+
+        List<Customer> customers = documents.values()
+                .stream()
+                .map(invoices -> Customer.builder()
+                        .name(invoices.get(0).getCustomer())
+                        .balance(sumInvoices(invoices))
                         .build())
                 .toList();
 
@@ -35,44 +43,20 @@ public class InvoiceService {
                 .build();
     }
 
-    private List<InvoiceDocument> convertToDocuments(CalculateRequest calculateRequest) {
-        List<CSVRecord> csvRecords = csvParser.parseCsv(calculateRequest.getFile());
-        List<InvoiceDocument> documents;
+    private InvoiceDocument calculateBalance(InvoiceDocument document, List<ExchangeRate> exchangeRates) {
+        ExchangeRate exchangeRate = currencyConverter.getExchangeRate(exchangeRates, document.getCurrency());
+        BigDecimal total = document.getTotal();
 
-        try {
-            documents = csvRecords.stream()
-                    .map(record -> InvoiceDocument.builder()
-                            .customer(record.get(InvoiceHeader.CUSTOMER.getName()))
-                            .vatNumber(Integer.parseInt(record.get(InvoiceHeader.VAT_NUMBER.getName())))
-                            .documentNumber(Integer.parseInt(record.get(InvoiceHeader.DOCUMENT_NUMBER.getName())))
-                            .type(InvoiceDocument.Type.getType(record.get(InvoiceHeader.TYPE.getName())))
-                            .parentDocument(optionalOfInteger(record.get(InvoiceHeader.PARENT_DOCUMENT.getName()))
-                                    .orElse(null))
-                            .currency(record.get(InvoiceHeader.CURRENCY.getName()))
-                            .total(new BigDecimal(record.get(InvoiceHeader.TOTAL.getName())))
-                            .build())
-                    .toList();
-        } catch (NumberFormatException e) {
-            throw new DataFormatException("CSV data is not in the correct format: " + e.getMessage(), e);
-        }
-        validateInvoiceDocuments(documents);
-        return documents;
+        document.setTotal(total.multiply(exchangeRate.getRate())
+                .setScale(2, RoundingMode.HALF_UP));
+        return document;
     }
 
-    private void validateInvoiceDocuments(List<InvoiceDocument> invoiceDocuments) {
-        invoiceDocuments.stream()
-                .filter(document -> document.getParentDocument() != null)
-                .forEach(document -> invoiceDocuments.stream()
-                        .filter(invoiceDocument -> invoiceDocument.getDocumentNumber().equals(document.getParentDocument()))
-                        .findAny()
-                        .orElseThrow(() -> new InconsistentDataException("Parent document with number: " + document.getParentDocument() + " not found")));
-    }
-
-    private Optional<Integer> optionalOfInteger(final String value) {
-        try {
-            return Optional.of(Integer.parseInt(value));
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
+    private BigDecimal sumInvoices(List<InvoiceDocument> invoiceDocuments) {
+        return invoiceDocuments.stream()
+                .reduce(BigDecimal.ZERO, (total, invoiceDocument) -> switch (invoiceDocument.getType()) {
+                    case INVOICE, DEBIT_NOTE -> total.add(invoiceDocument.getTotal());
+                    case CREDIT_NOTE -> total.subtract(invoiceDocument.getTotal());
+                }, BigDecimal::add);
     }
 }
