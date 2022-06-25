@@ -13,23 +13,14 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(value = CsvParseException.class)
+    @ExceptionHandler(value = {
+            CsvParseException.class,
+            BindException.class,
+            DataFormatException.class,
+            InconsistentDataException.class
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleException(CsvParseException exception, HttpServletRequest request) {
-        return new ResponseEntity<>(
-                ErrorResponse.builder()
-                        .timestamp(LocalDateTime.now())
-                        .status(HttpStatus.BAD_REQUEST.value())
-                        .message(exception.getMessage())
-                        .path(request.getRequestURI())
-                        .build(),
-                HttpStatus.BAD_REQUEST
-        );
-    }
-
-    @ExceptionHandler(value = BindException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleException(BindException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleException(RuntimeException exception, HttpServletRequest request) {
         return new ResponseEntity<>(
                 ErrorResponse.builder()
                         .timestamp(LocalDateTime.now())

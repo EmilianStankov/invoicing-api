@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class InvoiceCsvParser {
 
-    public static List<CSVRecord> parseCsv(MultipartFile file) {
+    public List<CSVRecord> parseCsv(MultipartFile file) {
         CSVParser csvParser;
         CSVFormat csvFormat = CSVFormat.DEFAULT
                 .builder()
@@ -45,7 +45,7 @@ public class InvoiceCsvParser {
         }
     }
 
-    private static void validateRecords(CSVFormat csvFormat, List<CSVRecord> records) {
+    private void validateRecords(CSVFormat csvFormat, List<CSVRecord> records) {
         if (records.size() < 2) {
             throw new CsvParseException("Csv file does not contain invoice data");
         }

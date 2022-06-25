@@ -25,7 +25,7 @@ public class InvoiceController {
     @CrossOrigin(origins = "*")
     @PostMapping(value = "sumInvoices", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CalculateResponse> sumInvoices(@Valid @ModelAttribute CalculateRequest calculateRequest) {
-        CalculateResponse response = invoiceService.suminvoices(calculateRequest);
+        CalculateResponse response = invoiceService.sumInvoices(calculateRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
