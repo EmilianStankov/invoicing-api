@@ -27,7 +27,7 @@ public class CurrencyConverter {
 
     public ExchangeRate getExchangeRate(List<ExchangeRate> exchangeRates, String currency) {
         return exchangeRates.stream()
-                .filter(exchangeRate -> exchangeRate.getCurrency().equals(currency))
+                .filter(exchangeRate -> exchangeRate.getCurrency().equalsIgnoreCase(currency))
                 .findFirst()
                 .orElseThrow(() -> new InconsistentDataException("Currency " + currency + " is not supported"));
     }
@@ -46,7 +46,7 @@ public class CurrencyConverter {
                 .orElseThrow(() -> new InconsistentDataException(
                         "Base currency not provided in the supplied list of exchange rates"));
         exchangeRates.stream()
-                .filter(rate -> rate.getCurrency().equals(outputCurrency))
+                .filter(rate -> rate.getCurrency().equalsIgnoreCase(outputCurrency))
                 .findAny()
                 .orElseThrow(() -> new InconsistentDataException(
                         "Currency: " + outputCurrency + " not found in the supplied list of exchange rates"));

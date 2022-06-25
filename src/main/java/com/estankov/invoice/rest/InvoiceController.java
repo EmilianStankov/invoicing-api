@@ -26,6 +26,9 @@ public class InvoiceController {
     @PostMapping(value = "sumInvoices", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CalculateResponse> sumInvoices(@Valid @ModelAttribute CalculateRequest calculateRequest) {
         CalculateResponse response = invoiceService.sumInvoices(calculateRequest);
+        if (response.getCustomers().size() == 0) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
