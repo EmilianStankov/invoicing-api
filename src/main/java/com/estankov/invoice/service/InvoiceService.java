@@ -32,6 +32,7 @@ public class InvoiceService {
         List<Customer> customers = documents.values()
                 .stream()
                 .map(invoices -> Customer.builder()
+                        .vatNumber(invoices.get(0).getVatNumber())
                         .name(invoices.get(0).getCustomer())
                         .balance(sumInvoices(invoices))
                         .build())
@@ -39,7 +40,7 @@ public class InvoiceService {
 
         return CalculateResponse.builder()
                 .currency(calculateRequest.getOutputCurrency())
-                .customers(customers)
+                .customers(filterCustomers(customers, calculateRequest.getCustomerVat()))
                 .build();
     }
 
@@ -58,5 +59,15 @@ public class InvoiceService {
                     case INVOICE, DEBIT_NOTE -> total.add(invoiceDocument.getTotal());
                     case CREDIT_NOTE -> total.subtract(invoiceDocument.getTotal());
                 }, BigDecimal::add);
+    }
+
+    private List<Customer> filterCustomers(List<Customer> customers, String vatNumber) {
+        if (vatNumber == null) {
+            return customers;
+        }
+        return customers.stream()
+                .filter(customer -> customer.getVatNumber()
+                        .equals(Integer.parseInt(vatNumber)))
+                .toList();
     }
 }

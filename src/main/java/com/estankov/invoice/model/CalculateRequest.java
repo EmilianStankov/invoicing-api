@@ -16,7 +16,7 @@ import java.util.List;
 public class CalculateRequest {
 
     private static final String EXCHANGE_RATES_PATTERN = "^(\\w){3}:\\d*(.\\d+)*$";
-    private static final String CURRENCY_PATTERN = "(\\w){3}$";
+    private static final String CURRENCY_PATTERN = "^(\\w){3}$";
 
     private MultipartFile file;
     private List<@NotBlank @Pattern(regexp = EXCHANGE_RATES_PATTERN, message = "Exchange rates not valid") String> exchangeRates;
@@ -24,5 +24,6 @@ public class CalculateRequest {
     private String outputCurrency;
 
     @Nullable
+    @Pattern(regexp = "^\\d+$")
     private String customerVat;
 }
