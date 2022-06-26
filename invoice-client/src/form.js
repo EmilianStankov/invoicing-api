@@ -4,12 +4,23 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function InvoiceForm() {
   const [exchangeRates, setExchangeRates] = React.useState("");
   const [outputCurrency, setOutputCurrency] = React.useState("");
   const file = React.createRef();
   const [customerVat, setCustomerVat] = React.useState(null);
+  const [success, setSuccess] = React.useState(false);
+  const [showSnackbar, setShowSnackbar] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState(false);
+
+  const hideSnackbar = () => {
+    setShowSnackbar(false);
+  }
   
   const submitInvoice = () => {
     const formData  = new FormData();
@@ -24,8 +35,18 @@ export default function InvoiceForm() {
     fetch("http://localhost:8080/api/v1/sumInvoices", {
       method: 'POST',
       body: formData
-    }).then(response => {
-      console.log(response)
+    }).then(async response => {
+      setShowSnackbar(true);
+      setSuccess(response.ok);
+      if (!response.ok) {
+        setErrorMessage(response.status === 404
+          ? "VAT number not found!"
+          : (await response.json()).message);
+      }
+    }).catch(error => {
+      setShowSnackbar(true);
+      setSuccess(false);
+      setErrorMessage("");
     })
   };
 
@@ -83,6 +104,22 @@ export default function InvoiceForm() {
             onChange={e => setCustomerVat(e.target.value)}
           />
         </Grid>
+        {
+          showSnackbar &&
+            <Snackbar open={showSnackbar} autoHideDuration={6000} onClose={hideSnackbar}>
+              <Alert severity={success ? "success" : "error"}>
+                { success ? "Invoice submitted successfully!" : "Failed to submit invoice! " + errorMessage }
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  color="inherit"
+                  onClick={hideSnackbar}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Alert>
+            </Snackbar>
+        }
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
