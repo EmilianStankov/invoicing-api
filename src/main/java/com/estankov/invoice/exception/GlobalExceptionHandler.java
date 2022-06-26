@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
+/**
+ * Handles validation errors and returns a 400 response
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

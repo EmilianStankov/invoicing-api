@@ -1,6 +1,7 @@
 package com.estankov.invoice.service;
 
 import com.estankov.invoice.exception.CsvParseException;
+import com.estankov.invoice.exception.DataFormatException;
 import com.estankov.invoice.model.InvoiceHeader;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -8,6 +9,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,9 +17,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Helper service for validating and parsing an invoice .csv
+ */
 @Service
 public class InvoiceCsvParser {
 
+    /**
+     * Returns all CSVRecords from an invoice .csv if it is in the correct format.
+     * @param file  an input .csv MultipartFile
+     * @return      List of CSVRecord
+     */
     public List<CSVRecord> parseCsv(MultipartFile file) {
         CSVParser csvParser;
         CSVFormat csvFormat = CSVFormat.DEFAULT
@@ -47,15 +57,15 @@ public class InvoiceCsvParser {
 
     private void validateRecords(CSVFormat csvFormat, List<CSVRecord> records) {
         if (records.size() < 2) {
-            throw new CsvParseException("Csv file does not contain invoice data");
+            throw new DataFormatException("Csv file does not contain invoice data");
         }
         CSVRecord headerRecord = records.get(0);
         if (!headerRecord.isConsistent()) {
-            throw new CsvParseException("Csv does not contain data in the correct format");
+            throw new DataFormatException("Csv does not contain data in the correct format");
         }
         Arrays.stream(csvFormat.getHeader()).forEach(header -> {
             if (!headerRecord.isMapped(header)) {
-                throw new CsvParseException("Csv does not contain data in the correct format");
+                throw new DataFormatException("Csv does not contain data in the correct format");
             }
         });
     }

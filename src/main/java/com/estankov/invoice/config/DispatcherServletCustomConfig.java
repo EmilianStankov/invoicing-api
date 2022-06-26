@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.DispatcherServlet;
 
+/**
+ * Adds a api version prefix to every endpoint
+ */
 @Configuration
 public class DispatcherServletCustomConfig {
 

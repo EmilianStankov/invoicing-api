@@ -1,5 +1,8 @@
 package com.estankov.invoice.model;
 
+/**
+ * Enumerates the expected columns in an invoice .csv
+ */
 public enum InvoiceHeader {
 
     CUSTOMER("Customer"),

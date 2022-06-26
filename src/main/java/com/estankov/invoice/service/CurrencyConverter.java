@@ -8,9 +8,19 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.List;
 
+/**
+ * Helper service that handles exchange rate conversions.
+ */
 @Service
 public class CurrencyConverter {
 
+    /**
+     * Converts the list of strings into a List of ExchangeRate after validating its compliance to the requirements.
+     * Sets the values for each currency based on the output currency.
+     * @param exchangeRates  Strings following the pattern "^((\w){3}:\d*(.\d*))$"
+     * @param outputCurrency A string following the pattern "^(\w){3}$", must be contained in the exchangeRates list
+     * @return               List of ExchangeRate
+     */
     public List<ExchangeRate> getExchangeRates(List<String> exchangeRates, String outputCurrency) {
         List<ExchangeRate> rates = exchangeRates.stream()
                 .map(exchangeRate -> exchangeRate.split(":"))
@@ -25,6 +35,12 @@ public class CurrencyConverter {
         return rates;
     }
 
+    /**
+     * Returns a specific ExchangeRate from a list based on its name.
+     * @param exchangeRates List of ExchangeRate supported exchange rates
+     * @param currency      The name of the currency we need the exchange rate of
+     * @return              ExchangeRate
+     */
     public ExchangeRate getExchangeRate(List<ExchangeRate> exchangeRates, String currency) {
         return exchangeRates.stream()
                 .filter(exchangeRate -> exchangeRate.getCurrency().equalsIgnoreCase(currency))

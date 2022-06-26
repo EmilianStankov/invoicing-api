@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * The exchange rate for a currency against the output currency
+ */
 @Data
 @Builder
 public class ExchangeRate {

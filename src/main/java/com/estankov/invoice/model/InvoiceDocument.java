@@ -6,6 +6,9 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+/**
+ * A representation of a row from a supported invoice .csv
+ */
 @Data
 @Builder
 public class InvoiceDocument {

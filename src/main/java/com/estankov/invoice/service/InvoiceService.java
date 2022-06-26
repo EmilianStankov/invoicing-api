@@ -9,17 +9,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The main service that handles invoice procesing
+ */
 @Service
 public class InvoiceService {
 
     private final DocumentConverter documentConverter;
     private final CurrencyConverter currencyConverter;
 
+    /**
+     * Construct an instance of the service by passing helper services
+     * @param documentConverter a DocumentConverter helper service instance
+     * @param currencyConverter a CurrencyConverter helper service instance
+     */
     public InvoiceService(DocumentConverter documentConverter, CurrencyConverter currencyConverter) {
         this.documentConverter = documentConverter;
         this.currencyConverter = currencyConverter;
     }
 
+    /**
+     * Returns the invoice amounts for the passed customers, grouped by their vatNumbers.
+     * If the CalculateRequest contains a customerVat the response is filtered only for the specific customer with that vatNumber.
+     * @param calculateRequest  The input request for invoice processing
+     * @return                  a CalculateResponse instance
+     */
     public CalculateResponse sumInvoices(CalculateRequest calculateRequest) {
         List<InvoiceDocument> invoiceDocuments = documentConverter.convertToDocuments(calculateRequest);
         List<ExchangeRate> exchangeRates = currencyConverter.getExchangeRates(calculateRequest.getExchangeRates(),

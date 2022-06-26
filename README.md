@@ -32,3 +32,10 @@ You can then run the application from the jar:
 ```
 java -jar build/libs/invoice-0.0.1-SNAPSHOT.jar
 ```
+
+### Documentation
+You can generate java docs by running the following command:
+```
+./gradlew clean javaDoc
+```
+You can then browse the docs in a web browser by opening [build/docs/javadoc/index.html](build/docs/javadoc/index.html)
